@@ -1,0 +1,106 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #fff;
+    color: #111;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+}
+
+main {
+    max-width: 620px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+
+h1 {
+    font-weight: normal;
+    font-size: 32px;
+    border-bottom: 2px solid #111;
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+}
+
+form {
+    display: flex;
+    gap: 8px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #111;
+    font: inherit;
+}
+
+button {
+    padding: 8px 14px;
+    border: 1px solid #111;
+    background: #fff;
+    color: #111;
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #111;
+    color: #fff;
+}
+
+#message {
+    min-height: 1.4em;
+    margin: 10px 0;
+    font-style: italic;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid #111;
+    padding-bottom: 12px;
+}
+
+.filters button.active {
+    background: #111;
+    color: #fff;
+}
+
+.summary {
+    margin: 0;
+    font-size: 15px;
+}
+
+#task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#task-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+#task-list li .title {
+    flex: 1;
+}
+
+#task-list li button {
+    padding: 4px 10px;
+    font-size: 14px;
+}
+
+/* ukończone: przekreślone i szare */
+#task-list li.completed .title {
+    text-decoration: line-through;
+    color: #888;
+}

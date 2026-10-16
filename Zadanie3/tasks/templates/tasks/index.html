@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskBoard</title>
+    <link rel="stylesheet" href="{% static 'tasks/style.css' %}">
+</head>
+<body>
+    <main>
+        <h1>TaskBoard</h1>
+
+        <form id="task-form">
+            {% csrf_token %}
+            <input type="text" id="task-title" placeholder="Nowe zadanie" autocomplete="off">
+            <button type="submit">Dodaj</button>
+        </form>
+
+        <p id="message"></p>
+
+        <div class="toolbar">
+            <div class="filters">
+                <button type="button" data-filter="all" class="active">Wszystkie</button>
+                <button type="button" data-filter="active">Aktywne</button>
+                <button type="button" data-filter="completed">Ukończone</button>
+            </div>
+            <p class="summary">
+                Wszystkie: <span id="count-all">0</span> ·
+                Ukończone: <span id="count-done">0</span>
+            </p>
+        </div>
+
+        <ul id="task-list"></ul>
+    </main>
+
+    <script src="{% static 'tasks/app.js' %}"></script>
+</body>
+</html>
