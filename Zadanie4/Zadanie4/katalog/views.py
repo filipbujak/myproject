@@ -1,33 +1,36 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from .models import Gra
+from .models import Produkcja
 
 
 def strona_glowna(request):
     return render(request, "katalog/index.html")
 
 
-def api_gry(request):
-    gry = Gra.objects.all()
+def api_produkcje(request):
 
-    dostepna = request.GET.get("dostepna")
-    if dostepna == "true":
-        gry = gry.filter(dostepna=True)
-    elif dostepna == "false":
-        gry = gry.filter(dostepna=False)
+    produkcje = Produkcja.objects.all()
+
+
+    uniwersum = request.GET.get("uniwersum")
+    if uniwersum in dict(Produkcja.UNIWERSA):
+        produkcje = produkcje.filter(uniwersum=uniwersum)
+
+    typ = request.GET.get("typ")
+    if typ in dict(Produkcja.TYPY):
+        produkcje = produkcje.filter(typ=typ)
 
     items = []
-    for gra in gry:
+    for p in produkcje:
         items.append({
-            "id": gra.id,
-            "tytul": gra.tytul,
-            "opis": gra.opis,
-            "gatunek": gra.gatunek,
-            "rok_wydania": gra.rok_wydania,
-            "cena": float(gra.cena),
-            "dostepna": gra.dostepna,
-            "data_dodania": gra.data_dodania.isoformat(),
+            "id": p.id,
+            "tytul": p.tytul,
+            "typ": p.get_typ_display(),
+            "rok_wydania": p.rok_wydania,
+            "gatunek": p.gatunek,
+            "uniwersum": p.get_uniwersum_display(),
+            "opis": p.opis,
         })
 
     return JsonResponse({"items": items})

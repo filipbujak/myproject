@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Gra
+from .models import Produkcja
 
 
-@admin.register(Gra)
-class GraAdmin(admin.ModelAdmin):
-    list_display = ("tytul", "gatunek", "rok_wydania", "cena", "dostepna")
-    list_filter = ("dostepna", "gatunek")
+@admin.register(Produkcja)
+class ProdukcjaAdmin(admin.ModelAdmin):
+    list_display = ("tytul", "typ", "uniwersum", "gatunek", "rok_wydania")
+    list_filter = ("uniwersum", "typ")
     search_fields = ("tytul",)

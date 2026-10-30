@@ -6,8 +6,9 @@ body {
     margin: 0;
     background: #fff;
     color: #111;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 17px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 main {
@@ -17,11 +18,11 @@ main {
 }
 
 h1 {
-    font-weight: normal;
-    font-size: 32px;
+    font-weight: 600;
+    font-size: 30px;
     border-bottom: 2px solid #111;
     padding-bottom: 8px;
-    margin-bottom: 24px;
+    margin: 0 0 24px;
 }
 
 form {
@@ -34,6 +35,11 @@ input[type="text"] {
     padding: 8px 10px;
     border: 1px solid #111;
     font: inherit;
+}
+
+input[type="text"]:focus {
+    outline: 2px solid #111;
+    outline-offset: 1px;
 }
 
 button {
@@ -51,9 +57,9 @@ button:hover {
 }
 
 #message {
-    min-height: 1.4em;
+    min-height: 1.5em;
     margin: 10px 0;
-    font-style: italic;
+    font-weight: 600;
 }
 
 .toolbar {
@@ -73,7 +79,7 @@ button:hover {
 
 .summary {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 #task-list {
@@ -92,11 +98,12 @@ button:hover {
 
 #task-list li .title {
     flex: 1;
+    word-break: break-word;
 }
 
 #task-list li button {
     padding: 4px 10px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 /* ukończone: przekreślone i szare */

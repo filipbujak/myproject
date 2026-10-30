@@ -1,19 +1,30 @@
 from django.db import models
 
 
-class Gra(models.Model):
-    tytul = models.CharField(max_length=100, verbose_name="Tytuł")
-    opis = models.TextField(verbose_name="Opis")
-    gatunek = models.CharField(max_length=50, verbose_name="Gatunek")
+class Produkcja(models.Model):
+    TYPY = [
+        ("film", "Film"),
+        ("serial", "Serial"),
+        ("special", "Special"),
+    ]
+    UNIWERSA = [
+        ("mcu", "MCU"),
+        ("fox", "Fox"),
+        ("sony", "Sony"),
+        ("inne", "Inne"),
+    ]
+
+    tytul = models.CharField(max_length=150, verbose_name="Tytuł")
+    typ = models.CharField(max_length=10, choices=TYPY, verbose_name="Typ")
     rok_wydania = models.IntegerField(verbose_name="Rok wydania")
-    cena = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Cena")
-    dostepna = models.BooleanField(default=True, verbose_name="Dostępna")
-    data_dodania = models.DateField(auto_now_add=True, verbose_name="Data dodania")
+    gatunek = models.CharField(max_length=60, verbose_name="Gatunek")
+    uniwersum = models.CharField(max_length=10, choices=UNIWERSA, verbose_name="Uniwersum")
+    opis = models.TextField(verbose_name="Opis")
 
     class Meta:
-        verbose_name = "Gra"
-        verbose_name_plural = "Gry"
-        ordering = ["tytul"]
+        verbose_name = "Produkcja"
+        verbose_name_plural = "Produkcje"
+        ordering = ["rok_wydania", "tytul"]
 
     def __str__(self):
         return f"{self.tytul} ({self.rok_wydania})"

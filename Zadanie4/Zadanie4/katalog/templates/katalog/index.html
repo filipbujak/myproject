@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog gier</title>
+    <title>Katalog Marvel</title>
     <style>
         * { box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
-            background: #f0f2f5;
+            background: #141414;
+            color: #eee;
             margin: 0;
-            color: #222;
         }
         header {
-            background: #1f3a5f;
+            background: #e62429;
             color: white;
             padding: 30px 20px;
             text-align: center;
         }
-        header h1 { margin: 0 0 10px; }
-        main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        header h1 { margin: 0 0 10px; letter-spacing: 2px; }
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
         .panel {
             display: flex;
             gap: 12px;
@@ -31,141 +31,161 @@
             padding: 10px 16px;
             font-size: 16px;
             border-radius: 6px;
-            border: 1px solid #aaa;
+            border: 1px solid #555;
         }
+        select { background: #222; color: #eee; }
         button {
-            background: #2a7de1;
+            background: #e62429;
             color: white;
             border: none;
             cursor: pointer;
         }
-        button:hover { background: #1b5fb4; }
-        button:disabled { background: #999; cursor: not-allowed; }
-        #komunikat-ladowania { color: #2a7de1; font-weight: bold; }
-        #komunikat-bledu { color: #c0392b; font-weight: bold; }
-        #komunikat-pusty { color: #7f8c8d; font-style: italic; }
+        button:hover { background: #b81c20; }
+        button:disabled { background: #666; cursor: not-allowed; }
+        #komunikat-ladowania { color: #f5c518; font-weight: bold; }
+        #komunikat-bledu { color: #ff6b6b; font-weight: bold; }
+        #komunikat-pusty { color: #aaa; font-style: italic; }
         #wyniki {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
         }
         .karta {
-            background: white;
+            background: #222;
+            border-left: 5px solid #e62429;
             border-radius: 8px;
             padding: 16px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
         .karta h3 { margin: 0 0 8px; }
         .karta p { margin: 4px 0; }
-        .tak { color: #27ae60; font-weight: bold; }
-        .nie { color: #c0392b; font-weight: bold; }
+        .znacznik {
+            display: inline-block;
+            background: #e62429;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Katalog gier</h1>
-        <p>Aplikacja pobiera dane z bazy Django przez API (JSON) i wyświetla je bez przeładowania strony.</p>
+        <h1>KATALOG MARVEL</h1>
+        <p>Filmy, seriale i specjale.</p>
     </header>
 
     <main>
         <div class="panel">
-            <label for="filtr">Filtr:</label>
-            <select id="filtr">
-                <option value="">Wszystkie gry</option>
-                <option value="true">Tylko dostępne</option>
-                <option value="false">Tylko niedostępne</option>
+            <label for="filtr-uniwersum">Uniwersum:</label>
+            <select id="filtr-uniwersum">
+                <option value="">Wszystkie</option>
+                <option value="mcu">MCU</option>
+                <option value="fox">Fox</option>
+                <option value="sony">Sony</option>
+                <option value="inne">Inne</option>
             </select>
+
+            <label for="filtr-typ">Typ:</label>
+            <select id="filtr-typ">
+                <option value="">Wszystkie</option>
+                <option value="film">Film</option>
+                <option value="serial">Serial</option>
+                <option value="special">Special</option>
+            </select>
+
             <button id="przycisk" type="button">Wczytaj dane</button>
         </div>
 
         <p id="komunikat-ladowania" hidden>Ładowanie danych...</p>
         <p id="komunikat-bledu" hidden></p>
-        <p id="komunikat-pusty" hidden>Brak gier spełniających kryteria.</p>
+        <p id="komunikat-pusty" hidden>Brak produkcji spełniających kryteria.</p>
 
         <div id="wyniki"></div>
     </main>
 
     <script>
         const przycisk = document.getElementById("przycisk");
-        const filtr = document.getElementById("filtr");
+        const filtrUniwersum = document.getElementById("filtr-uniwersum");
+        const filtrTyp = document.getElementById("filtr-typ");
         const wyniki = document.getElementById("wyniki");
         const ladowanie = document.getElementById("komunikat-ladowania");
         const blad = document.getElementById("komunikat-bledu");
         const pusty = document.getElementById("komunikat-pusty");
 
-        function dodajLinie(rodzic, etykieta, wartosc, klasa) {
+        function dodajLinie(rodzic, etykieta, wartosc) {
             const p = document.createElement("p");
             const b = document.createElement("strong");
             b.textContent = etykieta + ": ";
             const span = document.createElement("span");
             span.textContent = wartosc;
-            if (klasa) span.className = klasa;
             p.appendChild(b);
             p.appendChild(span);
             rodzic.appendChild(p);
         }
 
-        function pokazGry(gry) {
+        function pokazProdukcje(lista) {
             wyniki.textContent = "";
-            gry.forEach(function (gra) {
+            lista.forEach(function (p) {
                 const karta = document.createElement("div");
                 karta.className = "karta";
 
+                const znacznik = document.createElement("span");
+                znacznik.className = "znacznik";
+                znacznik.textContent = p.uniwersum + " • " + p.typ;
+                karta.appendChild(znacznik);
+
                 const tytul = document.createElement("h3");
-                tytul.textContent = gra.tytul;
+                tytul.textContent = p.tytul;
                 karta.appendChild(tytul);
 
-                dodajLinie(karta, "Gatunek", gra.gatunek);
-                dodajLinie(karta, "Rok", gra.rok_wydania);
-                dodajLinie(karta, "Cena", gra.cena.toFixed(2) + " zł");
-                dodajLinie(
-                    karta,
-                    "Dostępna",
-                    gra.dostepna ? "Tak" : "Nie",
-                    gra.dostepna ? "tak" : "nie"
-                );
-                dodajLinie(karta, "Opis", gra.opis);
+                dodajLinie(karta, "Rok", p.rok_wydania);
+                dodajLinie(karta, "Gatunek", p.gatunek);
+                dodajLinie(karta, "Opis", p.opis);
 
                 wyniki.appendChild(karta);
             });
         }
 
         async function wczytajDane() {
-            // 1. stan początkowy: czyścimy poprzednie wyniki i komunikaty
+            // stan początkowy
             wyniki.textContent = "";
             blad.hidden = true;
             pusty.hidden = true;
             ladowanie.hidden = false;
             przycisk.disabled = true;
 
-            // 2. budujemy adres z parametrem filtra
-            let url = "/api/gry/";
-            if (filtr.value !== "") {
-                url += "?dostepna=" + encodeURIComponent(filtr.value);
+            // budowanie adresu z parametrami filtrów
+            const parametry = new URLSearchParams();
+            if (filtrUniwersum.value !== "") {
+                parametry.set("uniwersum", filtrUniwersum.value);
+            }
+            if (filtrTyp.value !== "") {
+                parametry.set("typ", filtrTyp.value);
+            }
+            let url = "/api/produkcje/";
+            if (parametry.toString() !== "") {
+                url += "?" + parametry.toString();
             }
 
             try {
                 const response = await fetch(url);
 
-                // 3. sprawdzamy, czy serwer odpowiedział poprawnie (status 200-299)
                 if (!response.ok) {
                     throw new Error("Serwer zwrócił błąd: " + response.status);
                 }
 
-                // 4. zamieniamy treść odpowiedzi (tekst JSON) na obiekt JavaScript
                 const dane = await response.json();
 
-                // 5. obsługa pustej listy
                 if (dane.items.length === 0) {
                     pusty.hidden = false;
                 } else {
-                    pokazGry(dane.items);
+                    pokazProdukcje(dane.items);
                 }
             } catch (e) {
                 blad.textContent = "Nie udało się pobrać danych. " + e.message;
                 blad.hidden = false;
             } finally {
-                // 6. zawsze na końcu: chowamy ładowanie i odblokowujemy przycisk
                 ladowanie.hidden = true;
                 przycisk.disabled = false;
             }
