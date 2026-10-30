@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog gier</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            color: #222;
+        }
+        header {
+            background: #1f3a5f;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        header h1 { margin: 0 0 10px; }
+        main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .panel {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        select, button {
+            padding: 10px 16px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+        button {
+            background: #2a7de1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover { background: #1b5fb4; }
+        button:disabled { background: #999; cursor: not-allowed; }
+        #komunikat-ladowania { color: #2a7de1; font-weight: bold; }
+        #komunikat-bledu { color: #c0392b; font-weight: bold; }
+        #komunikat-pusty { color: #7f8c8d; font-style: italic; }
+        #wyniki {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .karta {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .karta h3 { margin: 0 0 8px; }
+        .karta p { margin: 4px 0; }
+        .tak { color: #27ae60; font-weight: bold; }
+        .nie { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Katalog gier</h1>
+        <p>Aplikacja pobiera dane z bazy Django przez API (JSON) i wyświetla je bez przeładowania strony.</p>
+    </header>
+
+    <main>
+        <div class="panel">
+            <label for="filtr">Filtr:</label>
+            <select id="filtr">
+                <option value="">Wszystkie gry</option>
+                <option value="true">Tylko dostępne</option>
+                <option value="false">Tylko niedostępne</option>
+            </select>
+            <button id="przycisk" type="button">Wczytaj dane</button>
+        </div>
+
+        <p id="komunikat-ladowania" hidden>Ładowanie danych...</p>
+        <p id="komunikat-bledu" hidden></p>
+        <p id="komunikat-pusty" hidden>Brak gier spełniających kryteria.</p>
+
+        <div id="wyniki"></div>
+    </main>
+
+    <script>
+        const przycisk = document.getElementById("przycisk");
+        const filtr = document.getElementById("filtr");
+        const wyniki = document.getElementById("wyniki");
+        const ladowanie = document.getElementById("komunikat-ladowania");
+        const blad = document.getElementById("komunikat-bledu");
+        const pusty = document.getElementById("komunikat-pusty");
+
+        function dodajLinie(rodzic, etykieta, wartosc, klasa) {
+            const p = document.createElement("p");
+            const b = document.createElement("strong");
+            b.textContent = etykieta + ": ";
+            const span = document.createElement("span");
+            span.textContent = wartosc;
+            if (klasa) span.className = klasa;
+            p.appendChild(b);
+            p.appendChild(span);
+            rodzic.appendChild(p);
+        }
+
+        function pokazGry(gry) {
+            wyniki.textContent = "";
+            gry.forEach(function (gra) {
+                const karta = document.createElement("div");
+                karta.className = "karta";
+
+                const tytul = document.createElement("h3");
+                tytul.textContent = gra.tytul;
+                karta.appendChild(tytul);
+
+                dodajLinie(karta, "Gatunek", gra.gatunek);
+                dodajLinie(karta, "Rok", gra.rok_wydania);
+                dodajLinie(karta, "Cena", gra.cena.toFixed(2) + " zł");
+                dodajLinie(
+                    karta,
+                    "Dostępna",
+                    gra.dostepna ? "Tak" : "Nie",
+                    gra.dostepna ? "tak" : "nie"
+                );
+                dodajLinie(karta, "Opis", gra.opis);
+
+                wyniki.appendChild(karta);
+            });
+        }
+
+        async function wczytajDane() {
+            // 1. stan początkowy: czyścimy poprzednie wyniki i komunikaty
+            wyniki.textContent = "";
+            blad.hidden = true;
+            pusty.hidden = true;
+            ladowanie.hidden = false;
+            przycisk.disabled = true;
+
+            // 2. budujemy adres z parametrem filtra
+            let url = "/api/gry/";
+            if (filtr.value !== "") {
+                url += "?dostepna=" + encodeURIComponent(filtr.value);
+            }
+
+            try {
+                const response = await fetch(url);
+
+                // 3. sprawdzamy, czy serwer odpowiedział poprawnie (status 200-299)
+                if (!response.ok) {
+                    throw new Error("Serwer zwrócił błąd: " + response.status);
+                }
+
+                // 4. zamieniamy treść odpowiedzi (tekst JSON) na obiekt JavaScript
+                const dane = await response.json();
+
+                // 5. obsługa pustej listy
+                if (dane.items.length === 0) {
+                    pusty.hidden = false;
+                } else {
+                    pokazGry(dane.items);
+                }
+            } catch (e) {
+                blad.textContent = "Nie udało się pobrać danych. " + e.message;
+                blad.hidden = false;
+            } finally {
+                // 6. zawsze na końcu: chowamy ładowanie i odblokowujemy przycisk
+                ladowanie.hidden = true;
+                przycisk.disabled = false;
+            }
+        }
+
+        przycisk.addEventListener("click", wczytajDane);
+    </script>
+</body>
+</html>
